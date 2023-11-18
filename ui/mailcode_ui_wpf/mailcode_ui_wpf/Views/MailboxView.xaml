@@ -1,0 +1,35 @@
+﻿<UserControl x:Class="mailcode_ui_wpf.Views.MailboxView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:mailcode_ui_wpf.Views"
+             mc:Ignorable="d" 
+             Width="auto" Height="auto">
+    <UserControl.Resources>
+        <Storyboard x:Key="FadeInOutAnimation">
+            <DoubleAnimation Storyboard.TargetName="successErrorBox"
+                             Storyboard.TargetProperty="Opacity" From="0" To="1" />
+        </Storyboard>
+    </UserControl.Resources>
+
+    <StackPanel>
+        <Label Content="Mailbox Details" FontSize="25" FontWeight="Bold" Padding="0,0,0,0"/>
+        <local:TextBoxWithLabel x:Name="emailTextBox" LabelText="Email" TextBoxText="{Binding Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,10,0,0" />
+        <local:TextBoxWithLabel x:Name="passwordTextBox" LabelText="Password" TextBoxText="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,10,0,0"/>
+        <local:TextBoxWithLabel x:Name="serverUrlTextBox" LabelText="Server URL" TextBoxText="{Binding ServerUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,10,0,0"/>
+        <local:TextBoxWithLabel x:Name="portTextBox" LabelText="Port" TextBoxText="{Binding ServerPort, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,10,0,0"/>
+        <CheckBox Name="useSSLCheckBox" Content="Use SSL" IsChecked="{Binding UseSSL, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,10,0,0"/>
+        <StackPanel Orientation="Horizontal" 
+                HorizontalAlignment="Left"
+                VerticalAlignment="Bottom"
+                Margin="0,20,0,10">
+            <Button Name="saveButton" Content="Save" HorizontalAlignment="Right" Width="80" Margin="0,0,10,0" 
+                    Command="{Binding AddOrUpdateMailboxCommand}" />
+            <Button Name="deleteButton" Content="Delete" HorizontalAlignment="Right" MinWidth="80" 
+                    Command="{Binding RemoveMailboxCommand}" />
+        </StackPanel>
+        <TextBlock Name="successErrorBox" Visibility="Collapsed"
+                   FontWeight="Medium" Padding="5,0,5,0"/>
+    </StackPanel>
+</UserControl>

@@ -1,0 +1,49 @@
+; Define the name and output path of the installer
+Outfile "MailcodesInstaller.exe"
+
+; Default installation directory
+InstallDir $ProgramFiles\Mailcodes
+
+; Request the user to select the installation directory
+!define MUI_PAGE_CUSTOMFUNCTION_SHOW DirPageShow
+!insertmacro MUI_PAGE_DIRECTORY
+
+; Define the sections
+Section
+SetOutPath $INSTDIR ; Set the installation directory selected by the user
+
+; Create "bin" and "data" directories
+CreateDirectory "$INSTDIR\bin"
+CreateDirectory "$INSTDIR\data"
+
+; Copy files to the installation directory
+File "mailcodes.exe"
+File "service.exe"
+File "readme.txt"
+
+SectionEnd
+
+Section "Service"
+
+; Register the service without starting it
+SetOutPath $INSTDIR
+ExecWait 'sc create MailCodeWatcher binPath= "$INSTDIR\bin\service.exe" start= demand'
+
+SectionEnd
+
+; Uninstall section
+Section "Uninstall"
+
+; Stop and uninstall the Windows service
+ExecWait 'sc stop MailCodeWatcher'
+ExecWait 'sc delete MailCodeWatcher'
+
+; Remove installation directory
+RMDir /r $INSTDIR
+
+SectionEnd
+
+; Function to set the default installation directory
+Function DirPageShow
+    StrCpy $InstDir $ProgramFiles\Mailcodes
+FunctionEnd
