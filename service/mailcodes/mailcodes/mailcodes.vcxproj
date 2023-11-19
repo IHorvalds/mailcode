@@ -144,12 +144,14 @@
     <ClCompile Include="notifications\notification-manager.cpp" />
     <ClCompile Include="persistence\email-repository.cpp" />
     <ClCompile Include="service\mail-service.cpp" />
+    <ClCompile Include="service\service-manager.cpp" />
     <ClCompile Include="service\ServiceBase.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\defines.h" />
     <ClInclude Include="common\paths.h" />
     <ClInclude Include="common\untyped-memory-buffer.h" />
+    <ClInclude Include="common\utility-macros.h" />
     <ClInclude Include="email\mail-manager.h" />
     <ClInclude Include="email\mailbox.h" />
     <ClInclude Include="logging\logging.h" />
@@ -160,6 +162,8 @@
     <ClInclude Include="persistence\email-repository.h" />
     <ClInclude Include="persistence\module.h" />
     <ClInclude Include="service\mail-service.h" />
+    <ClInclude Include="service\module.h" />
+    <ClInclude Include="service\service-manager.h" />
     <ClInclude Include="service\ServiceBase.h" />
   </ItemGroup>
   <ItemGroup>

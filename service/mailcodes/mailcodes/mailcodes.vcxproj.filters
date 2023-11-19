@@ -39,6 +39,9 @@
     <ClCompile Include="logging\logging.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="service\service-manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\defines.h">
@@ -81,6 +84,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="persistence\module.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="service\module.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\utility-macros.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="service\service-manager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

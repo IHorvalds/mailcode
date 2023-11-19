@@ -60,7 +60,7 @@ void NotificationHandler::toastDismissed(WinToastDismissalReason state) const
 {
     ENTERED();
 
-    LOGGER().debug("Toast was dimissed for reason: {}", state);
+    LOGGER().debug("Toast was dimissed for reason: {}", (int) state);
     mState = NotificationState::Dismissed;
 
     FINISHED();
