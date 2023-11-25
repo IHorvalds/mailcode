@@ -87,19 +87,31 @@ int main(int argc, char** argv)
         // do install/uninstall
         if (COMPARE_MASK(args, 0b1000))
         {
-            installService();
+            if (ServiceManager::installService())
+            {
+                std::cout << "Service successfully installed\n";
+            }
         }
         else if (COMPARE_MASK(args, 0b100))
         {
-            uninstallService();
+            if (ServiceManager::uninstallService())
+            {
+                std::cout << "Service succesfully uninstalled\n";
+            }
         }
         else if (COMPARE_MASK(args, 0b10))
         {
-            startService();
+            if (ServiceManager::startService())
+            {
+                std::cout << "Service succesfully started\n";
+            }
         }
         else if (COMPARE_MASK(args, 0b1))
         {
-            stopService();
+            if (ServiceManager::stopService())
+            {
+                std::cout << "Service succesfully stopped\n";
+            }
         }
         else
         {
@@ -111,23 +123,6 @@ int main(int argc, char** argv)
                                 GetLastError()));
             }
         }
-
-        // do start/stop
-        // if (COMPARE_MASK(args, 0b10))
-        //{
-        //    startService();
-
-        //    /*Mailservice mailservice;
-        //    if (!CServiceBase::Run(mailservice))
-        //    {
-        //        throw std::runtime_error(std::format("Service failed to run
-        //        with err {:#016Lx}", GetLastError()));
-        //    }*/
-        //}
-        // else if (COMPARE_MASK(args, 0b1))
-        //{
-        //    stopService();
-        //}
     }
     catch (const po::error& roError)
     {

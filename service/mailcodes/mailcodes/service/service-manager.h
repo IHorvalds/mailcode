@@ -1,5 +1,8 @@
 #pragma once
 
+namespace ServiceManager
+{
+
 //! @brief Installs the service using the Windows Service Manager
 //! @return true if successful, false otherwise
 bool installService();
@@ -15,3 +18,5 @@ bool startService();
 //! @brief Stops the service
 //! @return true if successful, false otherwise
 bool stopService();
+
+} // namespace ServiceManager
