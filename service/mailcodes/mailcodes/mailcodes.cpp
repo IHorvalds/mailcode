@@ -99,7 +99,9 @@ int main(int argc, char** argv)
                 std::cout << "Service succesfully uninstalled\n";
             }
         }
-        else if (COMPARE_MASK(args, 0b10))
+
+        // do start/stop
+        if (COMPARE_MASK(args, 0b10))
         {
             if (ServiceManager::startService())
             {
@@ -111,16 +113,6 @@ int main(int argc, char** argv)
             if (ServiceManager::stopService())
             {
                 std::cout << "Service succesfully stopped\n";
-            }
-        }
-        else
-        {
-            Mailservice mailservice;
-            if (!CServiceBase::Run(mailservice))
-            {
-                throw std::runtime_error(
-                    std::format("Service failed to run with err {:#016Lx}",
-                                GetLastError()));
             }
         }
     }

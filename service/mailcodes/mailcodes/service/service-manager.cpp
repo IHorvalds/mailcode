@@ -11,6 +11,20 @@
 namespace
 {
 
+class no_action_required : public std::exception
+{
+public:
+    explicit no_action_required() : mMsg("No action required") {};
+    explicit no_action_required(const char* msg)
+        : mMsg(std::format("No action required: {}", msg))
+    {
+    }
+    char const* what() const { return mMsg.c_str(); }
+
+private:
+    std::string mMsg;
+};
+
 void GetServiceStatusOrThrow(SC_HANDLE        schService,
                              LPSERVICE_STATUS lpssSvcStatus)
 {
@@ -213,8 +227,15 @@ bool installService()
 
         if (schService == NULL)
         {
+            auto dwError = GetLastError();
+            if (dwError == ERROR_SERVICE_EXISTS)
+            {
+                throw no_action_required("Service " SERVICE_NAME
+                                         " is already installed");
+            }
+
             throw std::runtime_error(std::format(
-                "CreateService failed with err {:#016Lx}", GetLastError()));
+                "CreateService failed with err {:#016Lx}", dwError));
         }
 
         if (!GiveLoggedInUserStartStopAccess(schSCManager, schService))
@@ -234,6 +255,11 @@ bool installService()
         std::cout << std::format("Failed to install the service: {}\n",
                                  roError.what());
         result = false;
+    }
+    catch (const no_action_required& rNARError)
+    {
+        LOGGER().info(rNARError.what());
+        std::cout << rNARError.what() << "\n";
     }
 
     FINISHED("Installed service: {}", result);
@@ -277,8 +303,15 @@ bool uninstallService()
                                  SERVICE_STOP | SERVICE_QUERY_STATUS | DELETE);
         if (schService == NULL)
         {
-            throw std::runtime_error(std::format(
-                "OpenService failed with err {:#016Lx}", GetLastError()));
+            auto dwError = GetLastError();
+            if (dwError == ERROR_SERVICE_DOES_NOT_EXIST)
+            {
+                throw no_action_required("Service " SERVICE_NAME
+                                         " is not installed");
+            }
+
+            throw std::runtime_error(
+                std::format("OpenService failed with err {:#016Lx}", dwError));
         }
 
         // Try to stop the service
@@ -324,6 +357,11 @@ bool uninstallService()
         std::cout << std::format("Failed to uninstall the service: {}\n",
                                  roError.what());
         result = false;
+    }
+    catch (const no_action_required& rNARError)
+    {
+        LOGGER().info(rNARError.what());
+        std::cout << rNARError.what() << "\n";
     }
 
     FINISHED("Uninstalled service: {}", result);
@@ -377,12 +415,12 @@ bool startService()
 
         if (ssSvcStatus.dwCurrentState == SERVICE_RUNNING)
         {
-            throw std::runtime_error("Service is already running");
+            throw no_action_required("Service is already running");
         }
 
         if (ssSvcStatus.dwCurrentState == SERVICE_START_PENDING)
         {
-            throw std::runtime_error("Service is already starting");
+            throw no_action_required("Service is already starting");
         }
 
         auto dwStartTickCount = GetTickCount64();
@@ -469,6 +507,11 @@ bool startService()
                                  roError.what());
         result = false;
     }
+    catch (const no_action_required& rNARError)
+    {
+        LOGGER().info(rNARError.what());
+        std::cout << rNARError.what() << "\n";
+    }
 
     FINISHED("Started service: {}", result);
     return result;
@@ -519,6 +562,7 @@ bool stopService()
         if (ControlService(schService, SERVICE_CONTROL_STOP, &ssSvcStatus))
         {
             LOGGER().info("Stopping {}", SERVICE_NAME);
+            std::cout << std::format("Stopping {}...\n", SERVICE_NAME);
 
             while (QueryServiceStatus(schService, &ssSvcStatus))
             {
