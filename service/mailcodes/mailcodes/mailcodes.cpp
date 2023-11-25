@@ -15,7 +15,15 @@ int main(int argc, char** argv)
 {
     if (argc < 1)
     {
-        LOGGER().error("Service manager called without an application name. argc argument is 0");
+        return EXIT_FAILURE;
+    }
+
+    std::filesystem::path execPath(argv[0]);
+
+    if (!SetCurrentDirectory(execPath.parent_path().c_str()))
+    {
+        std::cerr << "Failed to set working directory. Bailing\n";
+        return EXIT_FAILURE;
     }
 
     // clang-format off
@@ -48,14 +56,22 @@ int main(int argc, char** argv)
 
         if (args == 0)
         {
-            std::cout << options << std::endl;
-            return 0;
+            Mailservice mailservice;
+            if (!CServiceBase::Run(mailservice))
+            {
+                throw std::runtime_error(
+                    std::format("Service failed to run with err {:#016Lx}",
+                                GetLastError()));
+            }
+
+            return EXIT_SUCCESS;
         }
 
         // impossible actions
         if (COMPARE_MASK(args, 0b1100)) // install + uninstall
         {
-            throw std::runtime_error("Cannot install and uninstall at the same time");
+            throw std::runtime_error(
+                "Cannot install and uninstall at the same time");
         }
         if (COMPARE_MASK(args, 0b11)) // start + stop
         {
@@ -63,7 +79,8 @@ int main(int argc, char** argv)
         }
         if (COMPARE_MASK(args, 0b110)) // uninstall + start
         {
-            throw std::runtime_error("Cannot uninstall and start at the same time");
+            throw std::runtime_error(
+                "Cannot uninstall and start at the same time");
         }
         // done validating arguments
 
@@ -76,36 +93,53 @@ int main(int argc, char** argv)
         {
             uninstallService();
         }
-
-        // do start/stop
-        if (COMPARE_MASK(args, 0b10))
+        else if (COMPARE_MASK(args, 0b10))
         {
-            // startService();
-
-            Mailservice mailservice;
-            if (!CServiceBase::Run(mailservice))
-            {
-                throw std::runtime_error(std::format("Service failed to run with err {:#016Lx}", GetLastError()));
-            }
+            startService();
         }
         else if (COMPARE_MASK(args, 0b1))
         {
             stopService();
         }
+        else
+        {
+            Mailservice mailservice;
+            if (!CServiceBase::Run(mailservice))
+            {
+                throw std::runtime_error(
+                    std::format("Service failed to run with err {:#016Lx}",
+                                GetLastError()));
+            }
+        }
+
+        // do start/stop
+        // if (COMPARE_MASK(args, 0b10))
+        //{
+        //    startService();
+
+        //    /*Mailservice mailservice;
+        //    if (!CServiceBase::Run(mailservice))
+        //    {
+        //        throw std::runtime_error(std::format("Service failed to run
+        //        with err {:#016Lx}", GetLastError()));
+        //    }*/
+        //}
+        // else if (COMPARE_MASK(args, 0b1))
+        //{
+        //    stopService();
+        //}
     }
     catch (const po::error& roError)
     {
         auto error = std::format("Argument error: {}", roError.what());
         std::cerr << error << "\n";
         LOGGER().error(error);
-        return EXIT_FAILURE;
     }
     catch (const std::runtime_error& roError)
     {
         auto error = std::format("Runtime error: {}", roError.what());
         std::cerr << error << "\n";
         LOGGER().error(error);
-        return EXIT_FAILURE;
     }
 
     return EXIT_SUCCESS;

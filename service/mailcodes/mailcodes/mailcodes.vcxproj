@@ -137,6 +137,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="config\config-file.cpp" />
     <ClCompile Include="email\mailbox.cpp" />
     <ClCompile Include="logging\logging.cpp" />
     <ClCompile Include="mailcodes.cpp" />
@@ -152,6 +153,8 @@
     <ClInclude Include="common\paths.h" />
     <ClInclude Include="common\untyped-memory-buffer.h" />
     <ClInclude Include="common\utility-macros.h" />
+    <ClInclude Include="config\config-file.h" />
+    <ClInclude Include="config\module.h" />
     <ClInclude Include="email\mail-manager.h" />
     <ClInclude Include="email\mailbox.h" />
     <ClInclude Include="logging\logging.h" />

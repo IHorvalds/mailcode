@@ -20,6 +20,10 @@
 #include "ServiceBase.h"
 #include <assert.h>
 #include <strsafe.h>
+
+#include "module.h"
+#include "logging/logging.h"
+#include "common/defines.h"
 #pragma endregion
 
 #pragma region Static Members
@@ -46,9 +50,13 @@ CServiceBase* CServiceBase::s_service = NULL;
 BOOL CServiceBase::Run(CServiceBase& service)
 {
     s_service = &service;
-
-    SERVICE_TABLE_ENTRY serviceTable[] = {{(LPWSTR) service.m_name, (LPSERVICE_MAIN_FUNCTION) ServiceMain},
-                                          {NULL, NULL}};
+    // clang-format off
+    SERVICE_TABLE_ENTRY serviceTable[] = 
+    {
+        { (LPWSTR) service.m_name, ServiceMain },
+        { NULL, NULL }
+    };
+    // clang-format on
 
     // Connects the main thread of a service process to the service control
     // manager, which causes the thread to be the service control dispatcher
@@ -72,7 +80,7 @@ void WINAPI CServiceBase::ServiceMain(DWORD dwArgc, PWSTR* pszArgv)
     assert(s_service != NULL);
 
     // Register the handler function for the service
-    s_service->m_statusHandle = RegisterServiceCtrlHandler(s_service->m_name, ServiceCtrlHandler);
+    s_service->m_statusHandle = RegisterServiceCtrlHandler((PCWSTR) s_service->m_name, ServiceCtrlHandler);
     if (s_service->m_statusHandle == NULL)
     {
         throw GetLastError();
@@ -150,7 +158,7 @@ void WINAPI CServiceBase::ServiceCtrlHandler(DWORD dwCtrl)
 CServiceBase::CServiceBase(PCWSTR pszServiceName, BOOL fCanStop, BOOL fCanShutdown, BOOL fCanPauseContinue)
 {
     // Service name must be a valid string and cannot be NULL.
-    m_name = const_cast<PWSTR>((pszServiceName == NULL) ? L"" : pszServiceName);
+    m_name = (pszServiceName == NULL) ? L"" : pszServiceName;
 
     m_statusHandle = NULL;
 
@@ -173,7 +181,7 @@ CServiceBase::CServiceBase(PCWSTR pszServiceName, BOOL fCanStop, BOOL fCanShutdo
     m_status.dwWin32ExitCode           = NO_ERROR;
     m_status.dwServiceSpecificExitCode = 0;
     m_status.dwCheckPoint              = 0;
-    m_status.dwWaitHint                = 5000;
+    m_status.dwWaitHint                = 0;
 }
 
 //
@@ -206,16 +214,24 @@ void CServiceBase::Start(DWORD dwArgc, PWSTR* pszArgv)
     try
     {
         // Tell SCM that the service is starting.
-        SetServiceStatus(SERVICE_START_PENDING);
+        if (!SetServiceStatus(SERVICE_START_PENDING))
+        {
+            throw GetLastError();
+        }
 
         // Perform service-specific initialization.
         OnStart(dwArgc, pszArgv);
 
         // Tell SCM that the service is started.
-        SetServiceStatus(SERVICE_RUNNING);
+        if (!SetServiceStatus(SERVICE_RUNNING))
+        {
+            throw GetLastError();
+        }
     }
     catch (DWORD dwError)
     {
+        LOGGER().error("Service failed to start: {:#016Lx}", dwError);
+
         // Log the error.
         WriteErrorLogEntry(L"Service Start", dwError);
 
@@ -224,6 +240,8 @@ void CServiceBase::Start(DWORD dwArgc, PWSTR* pszArgv)
     }
     catch (...)
     {
+        LOGGER().error("Service failed to start: unknown error");
+
         // Log the error.
         WriteEventLogEntry(L"Service failed to start.", EVENTLOG_ERROR_TYPE);
 
@@ -265,16 +283,24 @@ void CServiceBase::Stop()
     try
     {
         // Tell SCM that the service is stopping.
-        SetServiceStatus(SERVICE_STOP_PENDING);
+        if (!SetServiceStatus(SERVICE_STOP_PENDING))
+        {
+            throw GetLastError();
+        }
 
         // Perform service-specific stop operations.
         OnStop();
 
         // Tell SCM that the service is stopped.
-        SetServiceStatus(SERVICE_STOPPED);
+        if (!SetServiceStatus(SERVICE_STOPPED))
+        {
+            throw GetLastError();
+        }
     }
     catch (DWORD dwError)
     {
+        LOGGER().error("Service failed to stop: {:#016Lx}", dwError);
+
         // Log the error.
         WriteErrorLogEntry(L"Service Stop", dwError);
 
@@ -283,6 +309,8 @@ void CServiceBase::Stop()
     }
     catch (...)
     {
+        LOGGER().error("Service failed to stop: unknown error");
+
         // Log the error.
         WriteEventLogEntry(L"Service failed to stop.", EVENTLOG_ERROR_TYPE);
 
@@ -318,16 +346,24 @@ void CServiceBase::Pause()
     try
     {
         // Tell SCM that the service is pausing.
-        SetServiceStatus(SERVICE_PAUSE_PENDING);
+        if (!SetServiceStatus(SERVICE_PAUSE_PENDING))
+        {
+            throw GetLastError();
+        }
 
         // Perform service-specific pause operations.
         OnPause();
 
         // Tell SCM that the service is paused.
-        SetServiceStatus(SERVICE_PAUSED);
+        if (!SetServiceStatus(SERVICE_PAUSED))
+        {
+            throw GetLastError();
+        }
     }
     catch (DWORD dwError)
     {
+        LOGGER().error("Failed to pause service: {:#016Lx}", dwError);
+
         // Log the error.
         WriteErrorLogEntry(L"Service Pause", dwError);
 
@@ -336,6 +372,8 @@ void CServiceBase::Pause()
     }
     catch (...)
     {
+        LOGGER().error("Failed to pause service: unknown error");
+
         // Log the error.
         WriteEventLogEntry(L"Service failed to pause.", EVENTLOG_ERROR_TYPE);
 
@@ -369,16 +407,24 @@ void CServiceBase::Continue()
     try
     {
         // Tell SCM that the service is resuming.
-        SetServiceStatus(SERVICE_CONTINUE_PENDING);
+        if (!SetServiceStatus(SERVICE_CONTINUE_PENDING))
+        {
+            throw GetLastError();
+        }
 
         // Perform service-specific continue operations.
         OnContinue();
 
         // Tell SCM that the service is running.
-        SetServiceStatus(SERVICE_RUNNING);
+        if (!SetServiceStatus(SERVICE_RUNNING))
+        {
+            throw GetLastError();
+        }
     }
     catch (DWORD dwError)
     {
+        LOGGER().error("Service failed to resume: {:#016Lx}", dwError);
+
         // Log the error.
         WriteErrorLogEntry(L"Service Continue", dwError);
 
@@ -387,6 +433,8 @@ void CServiceBase::Continue()
     }
     catch (...)
     {
+        LOGGER().error("Service failed to resume: unknown error");
+
         // Log the error.
         WriteEventLogEntry(L"Service failed to resume.", EVENTLOG_ERROR_TYPE);
 
@@ -422,15 +470,22 @@ void CServiceBase::Shutdown()
         OnShutdown();
 
         // Tell SCM that the service is stopped.
-        SetServiceStatus(SERVICE_STOPPED);
+        if (!SetServiceStatus(SERVICE_STOPPED))
+        {
+            throw GetLastError();
+        }
     }
     catch (DWORD dwError)
     {
+        LOGGER().error("Service failed to stop on shutdown: {:#016Lx}", dwError);
+
         // Log the error.
         WriteErrorLogEntry(L"Service Shutdown", dwError);
     }
     catch (...)
     {
+        LOGGER().error("Service failed to stop on shutdown: unknown error");
+
         // Log the error.
         WriteEventLogEntry(L"Service failed to shut down.", EVENTLOG_ERROR_TYPE);
     }
@@ -462,7 +517,7 @@ void CServiceBase::OnShutdown()
 //   * dwWin32ExitCode - error code to report
 //   * dwWaitHint - estimated time for pending operation, in milliseconds
 //
-void CServiceBase::SetServiceStatus(DWORD dwCurrentState, DWORD dwWin32ExitCode, DWORD dwWaitHint)
+BOOL CServiceBase::SetServiceStatus(DWORD dwCurrentState, DWORD dwWin32ExitCode, DWORD dwWaitHint)
 {
     static DWORD dwCheckPoint = 1;
 
@@ -476,7 +531,7 @@ void CServiceBase::SetServiceStatus(DWORD dwCurrentState, DWORD dwWin32ExitCode,
         ((dwCurrentState == SERVICE_RUNNING) || (dwCurrentState == SERVICE_STOPPED)) ? 0 : dwCheckPoint++;
 
     // Report the status of the service to the SCM.
-    ::SetServiceStatus(m_statusHandle, &m_status);
+    return ::SetServiceStatus(m_statusHandle, &m_status);
 }
 
 //

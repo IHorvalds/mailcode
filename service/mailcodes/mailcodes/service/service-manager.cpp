@@ -75,7 +75,9 @@ bool installService()
             throw std::runtime_error(std::format("CreateService failed with err {:#016Lx}", GetLastError()));
         }
 
-        LOGGER().info("Service {} is installed", SERVICE_NAME);
+        auto successMsg = std::format("Service {} is installed", SERVICE_NAME);
+        LOGGER().info(successMsg);
+        std::cout << successMsg << std::endl;
     }
     catch (const std::runtime_error& roError)
     {
@@ -159,7 +161,9 @@ bool uninstallService()
             throw std::runtime_error(std::format("DeleteService failed with err {:#016Lx}", GetLastError()));
         }
 
-        LOGGER().info("Service {} has been removed", SERVICE_NAME);
+        auto successMsg = std::format("Service {} has been removed", SERVICE_NAME);
+        LOGGER().info(successMsg);
+        std::cout << successMsg << std::endl;
     }
     catch (const std::runtime_error& roError)
     {
@@ -168,6 +172,7 @@ bool uninstallService()
     }
 
     FINISHED("Uninstalled service: {}", result);
+    return result;
 }
 
 bool startService()
@@ -298,6 +303,7 @@ bool startService()
     }
 
     FINISHED("Started service: {}", result);
+    return result;
 }
 
 bool stopService()
@@ -375,4 +381,5 @@ bool stopService()
     }
 
     FINISHED("Stopped service: {}", result);
+    return result;
 }

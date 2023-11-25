@@ -16,7 +16,6 @@ protected:
     void ServiceWorkerThread(std::stop_token token);
 
 private:
-    std::atomic_bool mRunning;
-    HANDLE           mStoppedEvent;
-    std::jthread     mWorker;
+    HANDLE       mStoppedEvent;
+    std::jthread mWorker;
 };

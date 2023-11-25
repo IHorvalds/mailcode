@@ -3,8 +3,9 @@
 #include "module.h"
 #include <functional>
 #include <iostream>
+#include <fstream>
 
-Mailservice::Mailservice() : CServiceBase(SERVICE_NAMEW, TRUE, TRUE, TRUE), mStoppedEvent(INVALID_HANDLE_VALUE)
+Mailservice::Mailservice() : CServiceBase(SERVICE_NAMEW, TRUE, TRUE, FALSE)
 {
     mStoppedEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
     if (mStoppedEvent == NULL)
@@ -39,14 +40,11 @@ void Mailservice::OnStop()
 
     LOGGER().info("Stopping mail service");
 
-    bool stopRequested = mWorker.request_stop();
+    mWorker.request_stop();
 
-    LOGGER().debug("Stop requested. Successful: {}", stopRequested);
-
-    while (mRunning == true)
+    if (WaitForSingleObject(mStoppedEvent, INFINITE) != WAIT_OBJECT_0)
     {
-        SetServiceStatus(SERVICE_STOP_PENDING, 0UL, 10UL);
-        std::this_thread::sleep_for(std::chrono::nanoseconds(100));
+        throw GetLastError();
     }
 
     LOGGER().debug("Service stopped.");
@@ -61,13 +59,13 @@ void Mailservice::ServiceWorkerThread(std::stop_token token)
     while (!token.stop_requested())
     {
         // TODO: Add the mail checking here
-        mRunning.store(true);
-        std::cout << std::format("Not stopping yet at {}...\n", std::chrono::system_clock::now());
+        LOGGER().info(std::format("Not stopping yet at {}...", std::chrono::system_clock::now()));
         std::this_thread::sleep_for(std::chrono::seconds(10));
     }
 
-    mRunning.store(false);
-    std::cout << std::format("Stopping now {}\n", std::chrono::system_clock::now());
+    LOGGER().info(std::format("Stopping now {}", std::chrono::system_clock::now()));
+
+    SetEvent(mStoppedEvent);
 
     FINISHED();
 }

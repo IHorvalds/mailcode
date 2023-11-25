@@ -42,6 +42,9 @@
     <ClCompile Include="service\service-manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="config\config-file.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\defines.h">
@@ -93,6 +96,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="service\service-manager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="config\module.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="config\config-file.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

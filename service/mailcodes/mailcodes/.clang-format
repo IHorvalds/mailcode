@@ -18,5 +18,6 @@ SpaceAfterTemplateKeyword: 'true'
 SpaceBeforeCpp11BracedList: 'true'
 TabWidth: '4'
 UseTab: Never
+ColumnLimit: 80
 
 ...

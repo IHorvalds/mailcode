@@ -9,6 +9,8 @@
 
 spdlog::logger& getDefaultLogger(std::string const& svModuleName);
 
+spdlog::logger& getSystemEventLogger();
+
 #ifndef LOGGER
 #define LOGGER() getDefaultLogger(MODULE_NAME)
 #endif
