@@ -8,23 +8,9 @@ void NotificationHandler::toastActivated() const
 {
     ENTERED();
 
-    if (mCallbacks.size() < 1)
-    {
-        LOGGER().warn("Toast notification was activated, but no callbacks were registered. Was this intentional?");
-        FINISHED();
-        return;
-    }
-
-    if (!mCallbacks[0]())
-    {
-        LOGGER().error("Callback function failed");
-        mState = NotificationState::Failed;
-    }
-    else
-    {
-        LOGGER().info("Successfully ran callback");
-        mState = NotificationState::Successful;
-    }
+    LOGGER().debug("Toast was activated without an action index. Calling "
+                   "OK-action handler");
+    mToastOkCallback();
 
     FINISHED();
 }
@@ -33,24 +19,16 @@ void NotificationHandler::toastActivated(int actionIndex) const
 {
     ENTERED();
 
-    if (mCallbacks.size() < actionIndex - 1)
+    switch (mActions.at(actionIndex))
     {
-        LOGGER().error("Toast notification was activated with index {}, but not callbacks were registered. This is "
-                       "definitely an error.",
-                       actionIndex);
-        FINISHED();
-        return;
-    }
-
-    if (!mCallbacks[actionIndex]())
-    {
-        LOGGER().error("Callback function failed");
-        mState = NotificationState::Failed;
-    }
-    else
-    {
-        LOGGER().info("Successfully ran callback");
-        mState = NotificationState::Successful;
+    case ToastAction::Ok:
+        LOGGER().debug("Toast was activated with an OK-action");
+        mToastOkCallback();
+        break;
+    case ToastAction::Cancel:
+        LOGGER().debug("Toast was activated with a Cancel-action");
+        mToastCancelCallback();
+        break;
     }
 
     FINISHED();
@@ -60,8 +38,8 @@ void NotificationHandler::toastDismissed(WinToastDismissalReason state) const
 {
     ENTERED();
 
-    LOGGER().debug("Toast was dimissed for reason: {}", (int) state);
-    mState = NotificationState::Dismissed;
+    LOGGER().debug("Toast was dismissed with reason: {}", (int) state);
+    mToastDismissedCallback(state);
 
     FINISHED();
 }
@@ -71,13 +49,7 @@ void NotificationHandler::toastFailed() const
     ENTERED();
 
     LOGGER().debug("Toast failed");
-    mState = NotificationState::Failed;
 
     FINISHED();
-}
-
-NotificationState NotificationHandler::getCurrentState() const
-{
-    return mState;
 }
 } // namespace Notifications

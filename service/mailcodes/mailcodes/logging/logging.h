@@ -20,13 +20,14 @@ spdlog::logger& getSystemEventLogger();
 #endif
 
 #ifndef FINISHED
-#define FINISHED(...)                                                                                                  \
-    {                                                                                                                  \
-        std::tuple args = std::make_tuple(__VA_ARGS__);                                                                \
-        if (std::tuple_size<decltype(args)> {}())                                                                      \
-            LOGGER().debug("Finished " __FUNCTION__ ": {}", spdlog::fmt_lib::join(args, ", "));                        \
-        else                                                                                                           \
-            LOGGER().debug("Finished " __FUNCTION__);                                                                  \
+#define FINISHED(...)                                                          \
+    {                                                                          \
+        std::tuple args = std::make_tuple(__VA_ARGS__);                        \
+        if (std::tuple_size<decltype(args)> {}())                              \
+            LOGGER().debug("Finished " __FUNCTION__ ": {}",                    \
+                           spdlog::fmt_lib::join(args, ", "));                 \
+        else                                                                   \
+            LOGGER().debug("Finished " __FUNCTION__);                          \
     }
 #endif
 

@@ -21,3 +21,7 @@
 
 // The password to the service account name
 #define SERVICE_PASSWORD NULL
+
+// AUMI Information for WinToast
+#define TOAST_APP_NAME L"Mailcodes"
+#define TOAST_APP_COMPANY L"Taylor Labs"

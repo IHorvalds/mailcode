@@ -80,9 +80,6 @@
     <ClInclude Include="notifications\notification-manager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="notifications\notification-callback.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="notifications\module.h">
       <Filter>Header Files</Filter>
     </ClInclude>

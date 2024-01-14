@@ -1,32 +1,28 @@
 #ifndef NOTIFICATION_HANDLER_H
 #define NOTIFICATION_HANDLER_H
 
-#include <concepts>
 #include <wintoast/wintoastlib.h>
-#include "notification-callback.h"
 
 using namespace WinToastLib;
 
 namespace Notifications
 {
 
-enum class NotificationState : int
+enum class ToastAction
 {
-    Invalid    = -1,
-    Successful = 0,
-    Dismissed,
-    Failed
+    Ok = 0,
+    Cancel
 };
 
 class NotificationHandler : public IWinToastHandler
 {
-private:
-    const std::vector<NotificationCallback<>> mCallbacks;
-    mutable NotificationState                 mState;
-
 public:
-    NotificationHandler(std::vector<NotificationCallback<>>& rCallbacks)
-        : mCallbacks(rCallbacks), mState(NotificationState::Invalid)
+    NotificationHandler(auto&& toastOkCallback, auto&& toastCancelCallback,
+                        auto&&                   toastDismissedCallback,
+                        std::vector<ToastAction> actions)
+        : mToastOkCallback(toastOkCallback),
+          mToastCancelCallback(toastCancelCallback),
+          mToastDismissedCallback(toastDismissedCallback), mActions(actions)
     {
     }
 
@@ -38,7 +34,11 @@ public:
 
     void toastFailed() const;
 
-    NotificationState getCurrentState() const;
+private:
+    const std::function<void(void)>                    mToastOkCallback;
+    const std::function<void(void)>                    mToastCancelCallback;
+    const std::function<void(WinToastDismissalReason)> mToastDismissedCallback;
+    const std::vector<ToastAction>                     mActions;
 };
 
 } // namespace Notifications

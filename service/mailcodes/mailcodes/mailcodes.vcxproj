@@ -108,7 +108,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;SPDLOG_NO_EXCEPTIONS;SQLITECPP_COMPILE_DLL;SQLITECPP_ENABLE_ASSERT_HANDLER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;SPDLOG_NO_EXCEPTIONS;SQLITECPP_COMPILE_DLL;SQLITECPP_ENABLE_ASSERT_HANDLER;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
@@ -159,7 +159,6 @@
     <ClInclude Include="email\mailbox.h" />
     <ClInclude Include="logging\logging.h" />
     <ClInclude Include="notifications\module.h" />
-    <ClInclude Include="notifications\notification-callback.h" />
     <ClInclude Include="notifications\notification-manager.h" />
     <ClInclude Include="notifications\notification-handler.h" />
     <ClInclude Include="persistence\email-repository.h" />

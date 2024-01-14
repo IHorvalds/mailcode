@@ -1,9 +1,8 @@
 #include "mail-service.h"
 #include "common/defines.h"
 #include "module.h"
+#include "notifications/notification-manager.h"
 #include <functional>
-#include <iostream>
-#include <fstream>
 
 Mailservice::Mailservice() : CServiceBase(SERVICE_NAMEW, TRUE, TRUE, FALSE)
 {
@@ -29,7 +28,8 @@ void Mailservice::OnStart(DWORD dwArgc, PWSTR* pszArgv)
 
     LOGGER().info("Starting mail service");
 
-    mWorker = std::jthread(std::bind(&Mailservice::ServiceWorkerThread, this, std::placeholders::_1));
+    mWorker = std::jthread(std::bind(&Mailservice::ServiceWorkerThread, this,
+                                     std::placeholders::_1));
 
     FINISHED();
 }
@@ -56,14 +56,40 @@ void Mailservice::ServiceWorkerThread(std::stop_token token)
 {
     ENTERED();
 
+    // TODO: start file watcher here to watch emails db file
+    //       on changes, it should log into new mailboxes and
+    //       log out of removed mailboxes
+
     while (!token.stop_requested())
     {
-        // TODO: Add the mail checking here
-        LOGGER().info(std::format("Not stopping yet at {}...", std::chrono::system_clock::now()));
+        LOGGER().info("Checking emails");
+
+        // TODO: Search and download mails here. Should only check
+        //       logged in mailboxes
+        // TODO: Search and extract auth code here
+        // TODO: if any codes found, for each code show toast
+
+        std::string auth_code = "123456";
+        std::string email     = "abdefg@gmail.com";
+
+        Notifications::NotificationManager::instance().showNotification(
+            "New auth code found",
+            std::format("Found new auth code for {}", email),
+            [&auth_code, &email]() {
+                LOGGER().info("Copying auth code \'{}\' to clipboard",
+                              auth_code);
+            },
+            []() {
+                LOGGER().info("Toast dismissed");
+            },
+            [](WinToastLib::IWinToastHandler::WinToastDismissalReason reason) {
+                LOGGER().info("Toast dismissed with reason {}", (int) reason);
+            });
+
         std::this_thread::sleep_for(std::chrono::seconds(10));
     }
 
-    LOGGER().info(std::format("Stopping now {}", std::chrono::system_clock::now()));
+    LOGGER().info("Stopping service now");
 
     SetEvent(mStoppedEvent);
 

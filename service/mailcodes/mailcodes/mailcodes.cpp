@@ -1,6 +1,7 @@
 #include <iostream>
 #include <format>
 #include <boost/program_options.hpp>
+#include <wintoast/wintoastlib.h>
 
 #define MODULE_NAME "service-manager-cli"
 
@@ -8,6 +9,7 @@
 #include "service/service-manager.h"
 #include "common/utility-macros.h"
 #include "service/mail-service.h"
+#include "notifications/notification-manager.h"
 
 namespace po = boost::program_options;
 
